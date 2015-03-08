@@ -1,0 +1,46 @@
+<!--
+  This allows you to record a chunk of audio, it then converts it to WAV and plays it back
+  It relies on https://github.com/kpopper/Recorderjs
+  -->
+<html>
+<head>
+	<title>Audio capture</title>
+  <script src="./Recorderjs/recorder.js"></script>
+</head>
+
+<body>
+
+<button disabled>Waiting...</button>
+<audio autoplay></audio>
+
+<script type="text/javascript">
+if (!Recorder.isRecordingSupported()) {
+  console.log('Not supported');
+} else {
+  var rec = new Recorder({workerPath: 'Recorderjs/recorderWorker.js'});
+  var button = document.querySelector('button');
+
+  var startEvent = function(){
+    rec.startRecording();
+    button.removeEventListener('click', startEvent);
+    button.addEventListener('click', stopEvent);
+    button.firstChild.data = 'Stop';
+  };
+  var stopEvent = function(){
+    rec.stopRecording();
+    button.removeEventListener('click', stopEvent);
+    button.firstChild.data = 'Done';
+    button.disabled = true;
+    rec.getWav(function(blob){
+      audio = document.querySelector('audio');
+      audio.src = window.URL.createObjectURL(blob);
+    });
+  };
+  button.addEventListener('click', startEvent);
+  button.firstChild.data = 'Start';
+  button.disabled = false;
+}
+
+</script>
+</body>
+</html>
